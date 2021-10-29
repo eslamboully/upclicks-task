@@ -47,7 +47,7 @@ namespace API
                     ValidateIssuerSigningKey = true,    
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])),    
                     ValidIssuer = _config["Jwt:Issuer"],    
-                    ValidateIssuer = true,    
+                    ValidateIssuer = false,    
                     ValidateAudience = false,
                 };    
             });

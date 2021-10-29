@@ -31,8 +31,10 @@ namespace API.Services
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],    
-              _config["Jwt:Issuer"],    
+            // var token = new JwtSecurityToken(_config["Jwt:Issuer"],    
+            //   _config["Jwt:Issuer"],    
+            var token = new JwtSecurityToken(null,
+              null,
               claims,    
               expires: DateTime.Now.AddDays(30),    
               signingCredentials: credentials);    
