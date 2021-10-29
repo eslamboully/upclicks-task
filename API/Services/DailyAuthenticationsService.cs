@@ -33,14 +33,16 @@ namespace API.Services
         public async Task<DailyAuthenticationDto> AddDailyAuthenticationForUser(string userEmail)
         {
             var user = await GetUserAsync(userEmail);
-            var userDailyAuthentication = await GetDailyAuthenticationsStatus(userEmail);
+            var userDailyAuthentication = await _context.DailyAuthentications
+                .FirstOrDefaultAsync(c => c.UserId == user.Id && c.Day.Date == DateTime.Now.Date);
 
             if (userDailyAuthentication != null) // The employee loggedin in the morning or not
             {
                 userDailyAuthentication.EndAt = DateTimeOffset.Now; // Change the employee logout
+                
                 await _context.SaveChangesAsync();
                 
-                return userDailyAuthentication;
+                return _mapper.Map<DailyAuthentication, DailyAuthenticationDto>(userDailyAuthentication);
             }
             else
             {
