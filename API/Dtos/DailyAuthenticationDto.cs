@@ -4,8 +4,7 @@ namespace API.Dtos
 {
     public class DailyAuthenticationDto
     {
-        public int Id { get; set; }
-        public DateTimeOffset StartAt { get; set; }
+        public DateTimeOffset StartAt { get; set; } = DateTimeOffset.Now;
         public DateTimeOffset EndAt { get; set; }
         public DateTime Day { get; set; }
     }

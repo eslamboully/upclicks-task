@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -5,6 +6,8 @@ using API.Data;
 using API.Dtos;
 using API.Entities;
 using API.Interfaces;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +19,31 @@ namespace API.Controllers
     {
         private readonly ITokenService _tokenService;
         private readonly DatabaseContext _context;
+        private readonly IMapper _mapper;
 
-        public AccountController(ITokenService tokenService, DatabaseContext context)
+        public AccountController(ITokenService tokenService, DatabaseContext context, IMapper mapper)
         {
             _tokenService = tokenService;
             _context = context;
+            _mapper = mapper;
+        }
+
+        [HttpPost("profile")]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> Profile()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            
+            var user = await _context.Users.Include(c => c.DailyAuthentications)
+                .FirstOrDefaultAsync(u => u.Email == email);
+            // return _mapper.Map<User, UserDto>(user);
+            return new UserDto
+            {
+                Email = user.Email,
+                Token = _tokenService.GenerateToken(user),
+                Name = user.Name,
+                Role = user.Role
+            };
         }
 
         [HttpPost("login")]
@@ -28,11 +51,11 @@ namespace API.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userLoginDto.Email);
             
-            if (user == null) return Unauthorized(401);
+            if (user == null) return Unauthorized("Invalid Email");
             
             var isValid = IsUserPasswordValid(user, userLoginDto.Password);
             
-            if (!isValid) return Unauthorized(401);
+            if (!isValid) return Unauthorized("Invalid Password");
 
             return new UserDto
             {
@@ -48,7 +71,7 @@ namespace API.Controllers
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userRegisterDto.Email);
             
-            if (user != null) return BadRequest("البريد الالكتروني موجود مسبقا");
+            if (user != null) return BadRequest("Email Exists");
             
             if (ModelState.IsValid)
             {
@@ -74,7 +97,7 @@ namespace API.Controllers
                 };
             }
 
-            return BadRequest("خطأ في البيانات");
+            return BadRequest("Something occurs");
         }
 
         private bool IsUserPasswordValid(User user, string password)

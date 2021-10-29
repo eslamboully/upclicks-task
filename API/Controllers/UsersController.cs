@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<UserToReturnDto>>> GetAllUsers()
         {
-            var users = await _context.Users.Include(c => c.DailyAuthentications)
+            var users = await _context.Users.Include(c => c.DailyAuthentications.Where(a => a.Day.Date == DateTime.Now.Date))
                 .Where(u => u.Role == "employee").ToListAsync();
 
             return _mapper.Map<List<User>, List<UserToReturnDto>>(users);

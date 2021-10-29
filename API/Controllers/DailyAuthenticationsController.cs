@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Data;
+using API.Dtos;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,15 +25,17 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<DailyAuthentication>> UserDailyAuthenticationStatus()
+        public async Task<ActionResult<DailyAuthenticationDto>> UserDailyAuthenticationStatus()
         {
-            return await _dailyAuthenticationsService.GetDailyAuthenticationsStatus(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            return await _dailyAuthenticationsService.GetDailyAuthenticationsStatus(email);
         }
 
         [HttpPost]
-        public async Task<ActionResult<bool>> AddDailyAuthentication()
+        public async Task<ActionResult<DailyAuthenticationDto>> AddDailyAuthentication()
         {
-            return await _dailyAuthenticationsService.AddDailyAuthenticationForUser(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            return await _dailyAuthenticationsService.AddDailyAuthenticationForUser(email);
         }
     }
 }
